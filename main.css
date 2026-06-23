@@ -961,10 +961,11 @@ button {
   user-select: none;
   -webkit-user-drag: none;
   pointer-events: none;
-  /* Desaturate all color (kills red numbers) then brighten so the former-red
-     text becomes white.  White teeth are already at max, so they stay white.
-     Black outlines get a mild lift to softer gray. */
-  filter: saturate(0) brightness(2);
+  /* Desaturate all colour (kills the coloured numbers), then a brightness +
+     strong contrast pass pushes the former-coloured numbers to full WHITE while
+     keeping the tooth outlines dark/crisp. White teeth stay white; black
+     outlines stay black. Works for every numbering artwork (Universal/Palmer/FDI). */
+  filter: saturate(0) brightness(2.3) contrast(2.3);
 }
 
 /* The hotspot/highlight layer tracks the <img> box exactly */
