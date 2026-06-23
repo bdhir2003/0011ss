@@ -1842,7 +1842,11 @@ const material1 = new THREE.SpriteMaterial({
 					zoom:            camera.zoom,
 					maxPolarAngle:   controls.maxPolarAngle,
 					upperRotX:       upperJawOcc ? upperJawOcc.rotation.x : 0,
+					upperRotY:       upperJawOcc ? upperJawOcc.rotation.y : 0,
+					upperRotZ:       upperJawOcc ? upperJawOcc.rotation.z : 0,
 					lowerRotX:       lowerJawOcc ? lowerJawOcc.rotation.x : 0,
+					lowerRotY:       lowerJawOcc ? lowerJawOcc.rotation.y : 0,
+					lowerRotZ:       lowerJawOcc ? lowerJawOcc.rotation.z : 0,
 					lowerPosZ:       lowerJawOcc ? lowerJawOcc.position.z : 0,
 					upperPosY:       upperJawOcc ? upperJawOcc.position.y : 0,
 					bonesVisible:    [],
@@ -1869,13 +1873,16 @@ const material1 = new THREE.SpriteMaterial({
 					}
 				});
 
-				// ---- Open both jaws wide (same approach as jawViewOn) ----
+				// ---- Open both jaws wide ----
+				// Use rotation.SET so any small base y/z orientation on the jaw groups
+				// is cleared — otherwise splaying about a non-world-aligned local axis
+				// makes the arches look rolled/tilted (the misalignment in Screenshot 1).
 				if (upperJawOcc) {
-					upperJawOcc.rotation.x = -Math.PI / 2;   // -90°
+					upperJawOcc.rotation.set( -Math.PI / 2, 0, 0 );   // clean -90° about world X
 					upperJawOcc.position.y = 0;
 				}
 				if (lowerJawOcc) {
-					lowerJawOcc.rotation.x = Math.PI / 2;    // +90°
+					lowerJawOcc.rotation.set( Math.PI / 2, 0, 0 );    // clean +90° about world X
 					lowerJawOcc.position.z = 20;
 				}
 
@@ -1906,8 +1913,9 @@ const material1 = new THREE.SpriteMaterial({
 					: sizeBox.getCenter(new THREE.Vector3());
 
 				var fov    = camera.fov * (Math.PI / 180);
-				// Tighter framing so the splayed arches fill the frame (not tiny).
-				var dist   = (maxDim / 2) / Math.tan(fov / 2) * 1.18;
+				// Frame the splayed arches with a little margin so they sit centred and
+				// don't touch the top/bottom edges.
+				var dist   = (maxDim / 2) / Math.tan(fov / 2) * 1.3;
 
 				// When both jaws splay open (upper -90°, lower +90°) BOTH occlusal
 				// surfaces end up facing +Z, so the clean view is from the FRONT and
@@ -2036,11 +2044,11 @@ const material1 = new THREE.SpriteMaterial({
 						controls.enabled = true;
 
 						if (upperJawOcc) {
-							upperJawOcc.rotation.x = s.upperRotX;
+							upperJawOcc.rotation.set( s.upperRotX, s.upperRotY || 0, s.upperRotZ || 0 );
 							upperJawOcc.position.y = s.upperPosY;
 						}
 						if (lowerJawOcc) {
-							lowerJawOcc.rotation.x = s.lowerRotX;
+							lowerJawOcc.rotation.set( s.lowerRotX, s.lowerRotY || 0, s.lowerRotZ || 0 );
 							lowerJawOcc.position.z = s.lowerPosZ;
 						}
 
@@ -2402,7 +2410,9 @@ const material1 = new THREE.SpriteMaterial({
 				function refit() {
 					if ( !currentMesh ) return;
 					resize();
-					fitCameraToObject( camera, controls, currentMesh, 1.2 );
+					// Larger offset = camera farther back = tooth framed smaller, so the
+					// full crown/body fits comfortably without touching the panel edges.
+					fitCameraToObject( camera, controls, currentMesh, 1.7 );
 					storeDefaultView();
 				}
 
@@ -2525,7 +2535,7 @@ const material1 = new THREE.SpriteMaterial({
 						scene.add( mesh );
 						currentMesh = mesh;
 						resize();                                     // correct aspect/size first
-						fitCameraToObject( camera, controls, mesh, 1.2 );  // per-tooth auto-fit (tighter framing → larger teeth)
+						fitCameraToObject( camera, controls, mesh, 1.7 );  // per-tooth auto-fit (larger offset → tooth framed smaller, fits comfortably)
 						storeDefaultView();                           // remember this framing for smooth Reset
 						hideError();
 						console.log( "[compare:" + label + "] load OK id=" + n );

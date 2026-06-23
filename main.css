@@ -443,6 +443,40 @@ button {
   padding-bottom: 20px;
 }
 
+/* Left-side cards: clean dark panels with NO bright outline (the right-side
+   control cards keep their light border). A soft shadow gives subtle depth. */
+.info-panel,
+.xray-panel {
+  border: 1px solid transparent;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.28);
+}
+
+/* Expand icon button in the Xray header (replaces the old "Expand" text). */
+.icon-link-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: auto;
+  width: 34px;
+  height: 34px;
+  padding: 0;
+  border: 0;
+  border-radius: 10px;
+  background: transparent;
+  color: rgba(255, 255, 255, 0.78);
+  transition: color 0.15s ease, background 0.15s ease;
+}
+
+.icon-link-button:hover {
+  color: #fff;
+  background: rgba(255, 255, 255, 0.06);
+}
+
+.icon-link-button:focus-visible {
+  outline: 2px solid var(--cyan);
+  outline-offset: 1px;
+}
+
 .text-link-button {
   min-height: auto;
   padding: 0;
@@ -513,10 +547,11 @@ button {
 
 .message-layer {
   position: absolute;
-  /* top / right / bottom / left — right reservation matches the overlay-stack
-     width (min(23vw,306px) + ~22px right offset + safe gap) so the banner
-     always stops clearly before the Visibility / Occlusion / Jaw cards. */
-  inset: clamp(12px, 1.2vw, 16px) clamp(260px, 24vw + 40px, 420px) auto clamp(12px, 1.2vw, 18px);
+  /* top / right / bottom / left. The bar stretches long across the top and
+     stops just before the info/reset icon column: the right reservation is the
+     control-column width plus a fixed allowance (~72px) for those icons + gap.
+     This keeps it wide on large screens without overlapping the icons. */
+  inset: clamp(12px, 1.2vw, 16px) calc(min(23vw, 306px) + 90px) auto clamp(12px, 1.2vw, 18px);
   z-index: 7;
   pointer-events: none;
 }
@@ -524,9 +559,10 @@ button {
 .message-box {
   min-height: 78px;
   border-radius: 18px;
-  /* Neutral thin light border (no blue/cyan "debug" outline), matching the cards. */
-  border: 1px solid var(--border);
-  background: rgba(30, 31, 34, 0.62);
+  /* Thin cyan/light-blue outline (the instruction-bar accent) over a dark inner
+     background — a clean, polished top notification bar. */
+  border: 1px solid rgba(122, 214, 233, 0.55);
+  background: rgba(28, 29, 32, 0.66);
   padding: 0 22px;
   display: flex;
   align-items: center;
@@ -1070,8 +1106,13 @@ button {
 
 .odo-confirm-btn {
   position: absolute;
-  bottom: calc(100% + 8px);
-  right: 14px;
+  /* Float above the odontogram card, horizontally CENTERED over it so it reads
+     as part of the odontogram workflow and stays balanced (clear of the model
+     and the right-side control cards). */
+  bottom: calc(100% + 10px);
+  left: 50%;
+  right: auto;
+  transform: translateX(-50%);
   z-index: 40;
   display: inline-flex;
   align-items: center;
@@ -1100,7 +1141,7 @@ button {
 
 .odo-confirm-btn:hover:not(:disabled) {
   background: var(--accent-soft, var(--accent));
-  transform: translateY(-1px);
+  transform: translateX(-50%) translateY(-1px);
 }
 
 .odo-systems {
@@ -1513,25 +1554,51 @@ button {
   margin-top: 10px;
   display: grid;
   gap: 6px;
-  /* Indent so the checkboxes sit under the label column (to the right of the
-     switches), matching the target layout. */
-  padding-left: 8px;
+  /* Center the Dentin/Pulp/Enamel group horizontally within the card so it
+     reads as balanced (instead of pinned to the left edge). The rows stay
+     left-aligned to each other so the checkboxes line up vertically. */
+  justify-content: center;
+  padding-left: 0;
 }
 
 .mini-check {
   display: flex;
   align-items: center;
-  gap: 12px;
-  font-size: 0.8rem;
+  gap: 10px;
+  font-size: 0.76rem;
   color: var(--label);
 }
 
+/* Small dark/transparent checkbox: thin light border + white checkmark (no red
+   fill). Replaces the native accent-coloured box. */
 .mini-check input {
-  width: 16px;
-  height: 16px;
+  appearance: none;
+  -webkit-appearance: none;
+  width: 15px;
+  height: 15px;
   margin: 0;
-  accent-color: var(--accent);
   flex: 0 0 auto;
+  border: 1px solid rgba(255, 255, 255, 0.55);
+  border-radius: 4px;
+  background: transparent;
+  position: relative;
+  cursor: pointer;
+}
+
+.mini-check input:checked {
+  border-color: rgba(255, 255, 255, 0.7);
+}
+
+.mini-check input:checked::after {
+  content: "";
+  position: absolute;
+  left: 4px;
+  top: 1px;
+  width: 4px;
+  height: 8px;
+  border: solid #fff;
+  border-width: 0 2px 2px 0;
+  transform: rotate(45deg);
 }
 
 .ui-only-check input,
